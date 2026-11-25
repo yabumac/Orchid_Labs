@@ -144,10 +144,7 @@ export const InteractiveStudioLab = () => {
               <span className="ml-2 text-xs font-mono text-muted-foreground">orchid-lab-cluster // v2.5.0-live</span>
             </div>
             <div className="flex items-center gap-3 text-xs font-mono text-muted-foreground">
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Cluster Online</span>
-              </span>
+              <span>Cluster Online</span>
             </div>
           </div>
 

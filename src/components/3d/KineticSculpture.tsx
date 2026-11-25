@@ -445,7 +445,6 @@ export const KineticSculpture = () => {
       {/* Floating 3D Control Pill Bar (Floating on top or bottom-left) */}
       <div className="absolute top-4 left-4 z-20 flex items-center gap-1.5 p-1.5 rounded-full bg-background/70 backdrop-blur-md border border-border/60 shadow-lg text-xs">
         <div className="flex items-center gap-1.5 px-2.5 py-1 text-muted-foreground font-mono text-[11px]">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           <span>WEBGL 3D</span>
           <span className="text-[10px] opacity-60">({fps} FPS)</span>
         </div>

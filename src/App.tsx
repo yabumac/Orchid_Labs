@@ -257,8 +257,7 @@ const Hero = () => {
             className="lg:col-span-6 space-y-6 sm:space-y-7 z-10"
           >
             {/* Category / Eyebrow Pill */}
-            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-muted/80 backdrop-blur-md border border-border/80 text-foreground text-xs font-mono uppercase tracking-wider">
-              <span className="w-2 h-2 rounded-full bg-orchid-primary animate-pulse" />
+            <div className="inline-flex items-center px-3.5 py-1.5 rounded-full bg-muted/80 backdrop-blur-md border border-border/80 text-foreground text-xs font-mono uppercase tracking-wider">
               <span>Orchid Labs // Next-Gen Studio</span>
             </div>
 
@@ -335,8 +334,7 @@ const Hero = () => {
                   <div className="text-3xl sm:text-4xl font-extrabold tracking-tight liquid-text leading-none">
                     2.5
                   </div>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
                     LIVE
                   </span>
                 </div>
@@ -502,8 +500,7 @@ const About = () => (
             <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/20 to-transparent" />
 
             <div className="absolute bottom-6 left-6 right-6 p-5 rounded-2xl bg-background/85 backdrop-blur-xl border border-border/80">
-              <div className="flex items-center gap-2.5 mb-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <div className="mb-1.5">
                 <span className="text-xs font-mono font-bold text-foreground">Orchid Collective // San Francisco</span>
               </div>
               <p className="text-xs text-muted-foreground">
@@ -784,8 +781,8 @@ const FooterSection = () => (
         {/* Brand Column */}
         <div className="md:col-span-2 space-y-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl overflow-hidden bg-gradient-to-br from-orchid-primary to-orchid-accent flex items-center justify-center p-0.5">
-              <img src={logo} alt="Orchid Labs" className="w-full h-full object-cover rounded-lg" />
+            <div className="w-9 h-9 rounded-xl overflow-hidden border border-amber-400/25 bg-[#071a25] flex items-center justify-center p-0.5 shadow-xs">
+              <img src={logo} alt="Orchid Labs" className="w-full h-full object-contain" />
             </div>
             <span className="font-bold text-lg tracking-tight">Orchid Labs</span>
             <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-muted text-muted-foreground border border-border">
@@ -795,8 +792,7 @@ const FooterSection = () => (
           <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
             A full-service multidisciplinary technology & design collective crafting autonomous systems, spatial 3D web platforms, and digital masterpieces.
           </p>
-          <div className="flex items-center gap-2 pt-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <div className="pt-2">
             <span className="text-xs font-mono text-muted-foreground">All Core Systems Operational</span>
           </div>
         </div>

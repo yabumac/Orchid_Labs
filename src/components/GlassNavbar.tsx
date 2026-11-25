@@ -102,8 +102,8 @@ export const GlassNavbar = () => {
                 onClick={() => scrollTo('#hero')}
                 className="flex items-center gap-2.5 group cursor-pointer text-left"
               >
-                <div className="w-8 h-8 rounded-xl overflow-hidden bg-gradient-to-br from-orchid-primary to-orchid-accent flex items-center justify-center p-0.5 shadow-md shadow-orchid-primary/20 group-hover:scale-105 transition-transform">
-                  <img src={logo} alt="Orchid Labs" className="w-full h-full object-cover rounded-lg" />
+                <div className="w-9 h-9 rounded-xl overflow-hidden border border-amber-400/25 bg-[#071a25] flex items-center justify-center p-0.5 shadow-sm group-hover:scale-105 transition-transform">
+                  <img src={logo} alt="Orchid Labs" className="w-full h-full object-contain" />
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-base sm:text-lg tracking-tight text-foreground group-hover:text-orchid-primary transition-colors">
