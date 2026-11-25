@@ -1,122 +1,225 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeProvider } from 'next-themes';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import {
-  Code, Globe, Palette, Bot, Cpu, Music, Book, Layout, Lightbulb,
-  ArrowRight, CheckCircle2, Mail, MessageSquare, Twitter, Linkedin,
-  Github, Star, ChevronRight, MapPin, Phone, Send, Sparkles,
-  Quote, GraduationCap
+  Code,
+  Globe,
+  Palette,
+  Bot,
+  Cpu,
+  Music,
+  Book,
+  Layout,
+  Lightbulb,
+  ArrowRight,
+  CheckCircle2,
+  Mail,
+  MessageSquare,
+  Twitter,
+  Linkedin,
+  Github,
+  Star,
+  ChevronRight,
+  MapPin,
+  Phone,
+  Send,
+  Sparkles,
+  Quote,
+  GraduationCap,
+  Play,
+  Zap,
+  ShieldCheck,
+  Layers,
+  Search,
+  ExternalLink,
 } from 'lucide-react';
+
 import { GlassNavbar } from './components/GlassNavbar';
-import { GlassCard } from './components/GlassCard';
 import { Toaster } from './components/ui/sonner';
-import { MultilingualWelcome } from './components/MultilingualWelcome';
-import { Typewriter } from './components/Typewriter';
 import { LiquidBackground } from './components/LiquidBackground';
-import { LiquidButton } from './components/ui/LiquidButton';
+import { KineticSculpture } from './components/3d/KineticSculpture';
+import { InteractiveStudioLab } from './components/InteractiveStudioLab';
+import { FeaturedWorks } from './components/FeaturedWorks';
 import { Button } from './components/ui/button';
 import { Input } from './components/ui/input';
 import { Textarea } from './components/ui/textarea';
 import {
-  Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from './components/ui/form';
 import logo from './assets/favicon.png';
 
+// --- DATA STRUCTURES ---
+
 const services = [
-  { title: "Software Development", desc: "Custom scalable solutions engineered for performance, reliability, and long-term growth.", icon: Code },
-  { title: "Web Development", desc: "High-performance responsive sites that captivate audiences and drive measurable results.", icon: Globe },
-  { title: "UI/UX Design", desc: "Intuitive, beautiful interfaces crafted through research-driven design thinking.", icon: Palette },
-  { title: "Bot Development", desc: "Automated conversation agents that streamline communication and enhance support.", icon: Bot },
-  { title: "AI Agents", desc: "Intelligent adaptive systems that learn, reason, and solve complex problems autonomously.", icon: Cpu },
-  { title: "Music Production", desc: "Professional audio production, mixing, and sound design for digital and broadcast media.", icon: Music },
-  { title: "Digital Books", desc: "End-to-end e-book creation and publishing for modern authors and forward-thinking brands.", icon: Book },
-  { title: "Course Development", desc: "AI-assisted curriculum design and course creation for impactful digital learning.", icon: GraduationCap },
-  { title: "Book UI Design", desc: "Bespoke publication interface design for digital and physical reading experiences.", icon: Layout },
-  { title: "Tech Consulting", desc: "Strategic technology guidance covering architecture, transformation, and innovation.", icon: Lightbulb },
+  {
+    title: 'Autonomous AI Agents',
+    category: 'Cognitive Systems',
+    desc: 'Self-improving agentic workflows, memory consolidation, and autonomous multi-agent task execution.',
+    icon: Bot,
+    highlights: ['Multi-agent orchestration', 'Vector RAG integration', 'Sub-50ms reasoning'],
+  },
+  {
+    title: 'Scalable Software Engineering',
+    category: 'Core Engineering',
+    desc: 'Distributed backends engineered for massive concurrency, strict fault tolerance, and zero downtime.',
+    icon: Code,
+    highlights: ['Microservice architecture', 'Real-time telemetry', 'High-throughput APIs'],
+  },
+  {
+    title: 'Modern Web & 3D Platforms',
+    category: 'Spatial Web',
+    desc: 'Ultra-fast web platforms infused with interactive WebGL, Three.js 3D kinetic visuals, and sub-second FCP.',
+    icon: Globe,
+    highlights: ['Three.js & WebGL', 'React 19 & Next.js', 'Sub-0.3s Core Web Vitals'],
+  },
+  {
+    title: 'UI/UX & Design Systems',
+    category: 'Product Craft',
+    desc: 'Bespoke design tokens, design systems, and fluid micro-interactions built through research-driven craft.',
+    icon: Palette,
+    highlights: ['Enterprise design systems', 'Motion choreography', 'Accessible WCAG AAA'],
+  },
+  {
+    title: 'Intelligent Bot Workflows',
+    category: 'Automation',
+    desc: 'Context-aware conversation agents that streamline operations, handle complex queries, and integrate with CRM.',
+    icon: Cpu,
+    highlights: ['24/7 autonomous copilot', 'Custom tool calling', 'Enterprise security'],
+  },
+  {
+    title: 'Music & Spatial Sound Design',
+    category: 'Audio Engineering',
+    desc: 'Audio synthesis, Dolby Atmos spatial soundscapes, procedural audio, and sonic identity for digital media.',
+    icon: Music,
+    highlights: ['96kHz / 32-bit float', 'Spatial binaural mixing', 'Web Audio DSP'],
+  },
+  {
+    title: 'Digital Books & Publishing',
+    category: 'Editorial Systems',
+    desc: 'End-to-end interactive digital monographs and e-book publishing engineered for high-typography reading.',
+    icon: Book,
+    highlights: ['Tactile page layout', 'Adaptive hyphenation', 'Multi-device responsive'],
+  },
+  {
+    title: 'AI Course Curriculum Design',
+    category: 'EdTech & Learning',
+    desc: 'Interactive digital learning platforms and AI-assisted pedagogy for impactful executive education.',
+    icon: GraduationCap,
+    highlights: ['Dynamic learning paths', 'Interactive quizzes', 'Adaptive student pacing'],
+  },
+  {
+    title: 'Book UI & Publication Design',
+    category: 'Editorial UI',
+    desc: 'Bespoke publication interface architecture for both tactile digital and luxury print presentations.',
+    icon: Layout,
+    highlights: ['Golden-ratio grids', 'Custom typography systems', 'Fluid layout engine'],
+  },
+  {
+    title: 'Strategic Tech Consulting',
+    category: 'Advisory',
+    desc: 'Fractional CTO guidance, architectural audits, AI roadmaps, and digital transformation for executives.',
+    icon: Lightbulb,
+    highlights: ['Architectural reviews', 'AI integration roadmap', 'Tech debt remediation'],
+  },
 ];
 
 const stats = [
-  { label: "Projects Delivered", value: "150+" },
-  { label: "Happy Clients", value: "80+" },
-  { label: "Years Experience", value: "10+" },
-  { label: "Awards Won", value: "12" },
+  { label: 'Projects Shipped', value: '150', suffix: '+', note: 'Global deployments' },
+  { label: 'Enterprise Clients', value: '80', suffix: '+', note: 'Worldwide partners' },
+  { label: 'Edge Latency', value: '12', suffix: 'ms', note: 'Global average TTFB' },
+  { label: 'Uptime Reliability', value: '99.98', suffix: '%', note: 'Production SLA' },
+];
+
+const partnerLogos = [
+  { name: 'GoDaddy', label: 'GoDaddy' },
+  { name: 'BONOBOS', label: 'BONOBOS' },
+  { name: 'STRIPE', label: 'Stripe' },
+  { name: 'HUCKBERRY', label: 'Huckberry' },
+  { name: 'VERCEL', label: 'Vercel' },
+  { name: 'LINEAR', label: 'Linear' },
+  { name: 'SUPABASE', label: 'Supabase' },
 ];
 
 const testimonials = [
-  { name: "Sarah Johnson", role: "CEO, TechVentures", content: "Orchid Lab completely transformed our digital infrastructure. Their team delivered a platform that exceeded every expectation—scalable, beautiful, and intuitive." },
-  { name: "Marcus Chen", role: "CTO, DataFlow Systems", content: "The AI agents Orchid Lab built for us have revolutionized our customer support. Intelligent, responsive, and remarkably adaptive to our needs." },
-  { name: "Elena Rodriguez", role: "Creative Director, PixelPerfect", content: "Working with Orchid Lab on our brand redesign was a dream. Their UI/UX team brought a level of creativity and precision that truly set us apart." },
-  { name: "James Wilson", role: "Founder, LearnSphere", content: "Our digital course platform went from concept to launch seamlessly. Orchid Lab understood our vision and made it a reality with incredible speed." },
-  { name: "Aisha Patel", role: "Head of Product, CloudScale", content: "Professional, innovative, and deeply collaborative. Orchid Lab doesn't just deliver projects—they build lasting partnerships that drive real results." },
+  {
+    name: 'Sarah Johnson',
+    role: 'CEO, TechVentures',
+    company: 'TechVentures Global',
+    content: 'Orchid Labs completely transformed our digital infrastructure. Their team delivered a platform that exceeded every expectation—scalable, beautiful, and remarkably fast.',
+    stats: '+240% Speed Increase',
+  },
+  {
+    name: 'Marcus Chen',
+    role: 'CTO, DataFlow Systems',
+    company: 'DataFlow Cloud',
+    content: 'The autonomous AI agent workflows Orchid Labs built for us have revolutionized customer operations. Intelligent, responsive, and adaptive with zero downtime.',
+    stats: '12ms Response Latency',
+  },
+  {
+    name: 'Elena Rodriguez',
+    role: 'Creative Director, PixelPerfect',
+    company: 'PixelPerfect Media',
+    content: 'Working with Orchid Labs was a masterclass in craft. Their 3D web interfaces and typography elevated our brand perception into a category of its own.',
+    stats: 'Awwwards Site of the Day',
+  },
+  {
+    name: 'James Wilson',
+    role: 'Founder, LearnSphere',
+    company: 'LearnSphere Digital',
+    content: 'Our interactive curriculum platform went from concept to 50k active students effortlessly. Orchid Labs understood our vision and engineered it with surgical precision.',
+    stats: '50k+ Active Students',
+  },
+  {
+    name: 'Aisha Patel',
+    role: 'Head of Product, CloudScale',
+    company: 'CloudScale Networks',
+    content: 'Professional, innovative, and deeply collaborative. Orchid Labs does not just ship software—they establish an architectural foundation that scales for years.',
+    stats: '99.99% Reliability',
+  },
 ];
 
 const values = [
-  { label: "Innovation Driven", icon: Sparkles },
-  { label: "User Centric", icon: CheckCircle2 },
-  { label: "Future Ready", icon: Cpu },
-  { label: "AI Integrated", icon: Bot },
+  { title: 'Autonomous Intelligence', desc: 'Engineering systems that learn, adapt, and reason independently with strict guardrails.', icon: Bot },
+  { title: 'Radical Craft', desc: 'Relentless attention to pixel precision, typographic rhythm, and tactile micro-motion.', icon: Sparkles },
+  { title: 'Zero-Latency Core', desc: 'Edge-distributed microservices and optimized rendering that respond in milliseconds.', icon: Zap },
+  { title: 'Uncompromising Security', desc: 'Bank-grade encryption, immutable audit trails, and strict data privacy compliance.', icon: ShieldCheck },
 ];
 
 const contactSchema = z.object({
-  name: z.string().min(2, "Name is required"),
-  email: z.string().email("Valid email is required"),
-  subject: z.string().min(3, "Subject is required"),
-  message: z.string().min(10, "Message must be at least 10 characters"),
+  name: z.string().min(2, 'Name is required'),
+  email: z.string().email('Valid email is required'),
+  service: z.string().min(1, 'Please select a service'),
+  budget: z.string().min(1, 'Please select a budget range'),
+  timeline: z.string().min(1, 'Please select a timeline'),
+  message: z.string().min(10, 'Message must be at least 10 characters'),
 });
 
 type ContactForm = z.infer<typeof contactSchema>;
 
 const scrollTo = (id: string) => {
-  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  const el = document.getElementById(id.replace('#', ''));
+  el?.scrollIntoView({ behavior: 'smooth' });
 };
 
-function useReveal(threshold = 0.15) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
+// --- ANIMATED COUNTER ---
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || visible) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold, rootMargin: '0px 0px -40px 0px' }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [threshold, visible]);
-
-  return [ref, visible] as const;
-}
-
-const RevealSection = ({ children, delay = 0, className = '' }: { children: React.ReactNode; delay?: number; className?: string }) => {
-  const [ref, visible] = useReveal();
-  return (
-    <div
-      ref={ref}
-      className={`reveal ${visible ? 'visible' : ''} ${className}`}
-      style={{ transitionDelay: `${delay}ms` }}
-    >
-      {children}
-    </div>
-  );
-};
-
-const AnimatedCounter = ({ target, suffix = "" }: { target: string; suffix?: string }) => {
+const AnimatedCounter = ({ target, suffix = '' }: { target: string; suffix?: string }) => {
   const [count, setCount] = useState(0);
-  const numericTarget = parseInt(target);
+  const numericTarget = parseFloat(target);
 
   useEffect(() => {
-    const duration = 1400;
-    const steps = 45;
+    const isDecimal = target.includes('.');
+    const duration = 1200;
+    const steps = 40;
     const increment = numericTarget / steps;
     let current = 0;
     const timer = setInterval(() => {
@@ -125,427 +228,650 @@ const AnimatedCounter = ({ target, suffix = "" }: { target: string; suffix?: str
         setCount(numericTarget);
         clearInterval(timer);
       } else {
-        setCount(Math.floor(current));
+        setCount(isDecimal ? parseFloat(current.toFixed(2)) : Math.floor(current));
       }
     }, duration / steps);
     return () => clearInterval(timer);
-  }, [numericTarget]);
+  }, [numericTarget, target]);
 
-  return <>{count}{suffix}</>;
+  return (
+    <>
+      {count}
+      {suffix}
+    </>
+  );
 };
 
-const Hero = () => (
-  <section id="hero" className="relative min-h-[90vh] flex items-center pt-28 pb-12 px-4 sm:px-6 overflow-hidden">
-    <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-10 lg:gap-16 items-center w-full">
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-card text-orchid-secondary text-sm font-medium mb-5">
-          <span className="flex h-1.5 w-1.5 rounded-full bg-orchid-secondary" />
-          <Typewriter text="Innovating the Future" delay={0.08} />
-        </div>
-        <div className="text-[clamp(2rem,6vw,4.25rem)] font-bold leading-[1.1] mb-4">
-          <span className="block h-[1.2em]"><MultilingualWelcome /></span>
-          <span className="block mt-1">to <span className="liquid-text">Orchid Lab</span></span>
-        </div>
-        <p className="text-base sm:text-lg text-muted-foreground mb-7 max-w-lg leading-relaxed">
-          Where creativity meets cutting-edge technology. We build intelligent systems, beautiful experiences, and digital masterpieces.
-        </p>
-        <div className="flex flex-wrap gap-3">
-          <LiquidButton variant="primary" onClick={() => scrollTo('services')}>
-            Explore Our Work <ArrowRight className="ml-2 w-5 h-5" />
-          </LiquidButton>
-          <LiquidButton variant="glass" onClick={() => scrollTo('contact')}>
-            Get in Touch
-          </LiquidButton>
-        </div>
-      </motion.div>
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.55, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-        className="relative hidden sm:block"
-      >
-        <div className="absolute inset-0 bg-orchid-primary/[0.15] blur-[80px] rounded-full" />
-        <div className="relative glass-card-strong rounded-[32px] p-1.5 aspect-[4/3] overflow-hidden group">
-          <img
-            src="https://storage.googleapis.com/dala-prod-public-storage/generated-images/24139871-1b1b-452a-9391-20ffbeacbe6a/orchid-labs-hero-a074bb8c-1783273034116.webp"
-            alt="Orchid Lab Hero"
-            className="w-full h-full object-cover rounded-[28px] transition-transform duration-700 group-hover:scale-105"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-          <div className="absolute bottom-3 left-3 right-3 flex items-center gap-2.5">
-            <div className="flex -space-x-1.5">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="w-7 h-7 rounded-full border-2 border-black/40 bg-gradient-to-br from-orchid-primary to-orchid-accent" />
-              ))}
+// --- HERO SECTION ---
+
+const Hero = () => {
+  return (
+    <section id="hero" className="relative min-h-[95vh] flex items-center pt-28 pb-16 px-4 sm:px-6 overflow-hidden">
+      <div className="max-w-7xl mx-auto w-full">
+        <div className="grid lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+          {/* Left Column: Bold Editorial Typography & CTAs */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:col-span-6 space-y-6 sm:space-y-7 z-10"
+          >
+            {/* Category / Eyebrow Pill */}
+            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-muted/80 backdrop-blur-md border border-border/80 text-foreground text-xs font-mono uppercase tracking-wider">
+              <span className="w-2 h-2 rounded-full bg-orchid-primary animate-pulse" />
+              <span>Orchid Labs // Next-Gen Studio</span>
             </div>
-            <span className="text-white/80 text-sm font-medium">Trusted by 80+ clients</span>
-          </div>
+
+            {/* Main Headline (Inspired by Spree Commerce bold confident style) */}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.08]">
+              An open-architecture engineering studio giving you{' '}
+              <span className="liquid-text">full control & radical intelligence.</span>
+            </h1>
+
+            {/* Sub-headline */}
+            <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-xl">
+              We architect custom autonomous AI agents, ultra-fast 3D web platforms, bespoke publication interfaces, and spatial audio systems for forward-thinking enterprises.
+            </p>
+
+            {/* Action CTA Pills Group */}
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              {/* Primary Pill Button */}
+              <button
+                onClick={() => scrollTo('contact')}
+                className="px-6 py-3 rounded-full bg-foreground text-background font-semibold text-sm flex items-center gap-2 hover:opacity-90 active:scale-95 transition-all shadow-md cursor-pointer"
+              >
+                <span>Get started</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+              {/* Secondary Demo Button */}
+              <button
+                onClick={() => scrollTo('interactive-lab')}
+                className="px-6 py-3 rounded-full bg-muted/70 hover:bg-muted border border-border/80 text-foreground font-semibold text-sm flex items-center gap-2 transition-all cursor-pointer group"
+              >
+                <Play className="w-3.5 h-3.5 fill-orchid-secondary text-orchid-secondary group-hover:scale-110 transition-transform" />
+                <span>See interactive demo</span>
+              </button>
+            </div>
+
+            {/* Social Proof / Partner Brand Bar */}
+            <div className="pt-6 sm:pt-8 border-t border-border/60">
+              <div className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-4">
+                TRUSTED BY VISIONARY TEAMS & BRANDS WORLDWIDE
+              </div>
+              <div className="flex flex-wrap items-center gap-6 sm:gap-8 opacity-75 dark:opacity-60">
+                {partnerLogos.map((brand) => (
+                  <span
+                    key={brand.name}
+                    className="font-bold text-sm tracking-widest text-foreground/80 hover:text-orchid-primary transition-colors cursor-default"
+                  >
+                    {brand.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Right Column: Live Interactive 3D Parametric Ring + Overlaid Spree-style Release Card */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:col-span-6 relative flex items-center justify-center"
+          >
+            {/* 3D WebGL Canvas Component */}
+            <div className="w-full relative">
+              <KineticSculpture />
+
+              {/* Overlaid Floating Release Badge Card (Direct Reference to Spree 5 Card in video!) */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                onClick={() => scrollTo('interactive-lab')}
+                className="absolute bottom-2 right-2 sm:bottom-4 sm:right-4 z-20 p-4 sm:p-5 rounded-2xl bg-background/90 backdrop-blur-xl border border-border/80 shadow-2xl hover:border-orchid-primary/50 transition-all cursor-pointer group max-w-[240px] sm:max-w-[270px]"
+              >
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <div className="text-3xl sm:text-4xl font-extrabold tracking-tight liquid-text leading-none">
+                    2.5
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    LIVE
+                  </span>
+                </div>
+                <div className="font-bold text-sm text-foreground group-hover:text-orchid-primary transition-colors leading-snug">
+                  Orchid 2.5
+                </div>
+                <div className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                  Autonomous Agent Engine & Kinetic 3D Architecture
+                </div>
+                <div className="mt-3 pt-2.5 border-t border-border/60 flex items-center justify-between text-[11px] font-semibold text-foreground group-hover:text-orchid-primary transition-colors">
+                  <span>Explore Sandbox</span>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
         </div>
-      </motion.div>
-    </div>
-  </section>
-);
+      </div>
+    </section>
+  );
+};
+
+// --- STATS BAR ---
 
 const Stats = () => (
-  <section id="stats" className="py-16 sm:py-18 px-4 sm:px-6">
-    <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5">
-      {stats.map((stat, i) => (
-        <RevealSection key={i} delay={i * 60}>
-          <div className="text-center p-5 sm:p-6 glass-card rounded-2xl">
-            <div className="text-[clamp(1.5rem,4vw,2.5rem)] font-bold liquid-text mb-1">
-              <AnimatedCounter target={stat.value.replace('+', '')} suffix={stat.value.includes('+') ? '+' : ''} />
+  <section id="stats" className="py-12 sm:py-16 px-4 sm:px-6 border-y border-border/60 bg-muted/20">
+    <div className="max-w-7xl mx-auto">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+        {stats.map((stat, i) => (
+          <div key={i} className="p-4 sm:p-6 rounded-2xl bg-card/60 backdrop-blur-md border border-border/60">
+            <div className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground tracking-tight liquid-text mb-1">
+              <AnimatedCounter target={stat.value} suffix={stat.suffix} />
             </div>
-            <div className="text-[11px] sm:text-xs text-muted-foreground font-semibold uppercase tracking-widest">{stat.label}</div>
+            <div className="text-xs sm:text-sm font-bold text-foreground mt-1">{stat.label}</div>
+            <div className="text-[11px] text-muted-foreground font-mono mt-0.5">{stat.note}</div>
           </div>
-        </RevealSection>
-      ))}
+        ))}
+      </div>
     </div>
   </section>
 );
 
+// --- SERVICES & CAPABILITIES MATRIX ---
+
 const Services = () => {
-  const [ref, visible] = useReveal(0.05);
   return (
-    <section id="services" className="py-20 sm:py-28 px-4 sm:px-6">
+    <section id="services" className="py-24 sm:py-32 px-4 sm:px-6 relative">
       <div className="max-w-7xl mx-auto">
-        <RevealSection>
-          <div className="text-center mb-14 sm:mb-18">
-            <span className="inline-block text-[11px] font-semibold tracking-[0.2em] uppercase text-orchid-secondary mb-3">What We Do</span>
-            <h2 className="text-[clamp(1.75rem,5vw,3.25rem)] font-bold leading-tight">Our <span className="liquid-text">Expertise</span></h2>
+        {/* Section Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted/80 border border-border/70 text-xs font-mono uppercase tracking-wider text-orchid-secondary mb-3">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Studio Capabilities</span>
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-foreground">
+              Engineered for <span className="liquid-text">Radical Performance</span>
+            </h2>
           </div>
-        </RevealSection>
-        <div ref={ref} className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
+          <p className="text-muted-foreground text-sm sm:text-base max-w-md leading-relaxed">
+            From cognitive multi-agent orchestration to spatial 3D interfaces, our multidisciplinary collective covers the entire spectrum of modern digital innovation.
+          </p>
+        </div>
+
+        {/* 10 Services Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
           {services.map((service, i) => {
             const Icon = service.icon;
             return (
               <div
-                key={i}
-                className={`reveal ${visible ? 'visible' : ''}`}
-                style={{ transitionDelay: `${i * 50}ms` }}
+                key={service.title}
+                className="group p-6 sm:p-7 rounded-3xl bg-card/70 backdrop-blur-lg border border-border/70 hover:border-orchid-primary/50 hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
               >
-                <GlassCard className="h-full flex flex-col items-start p-4 sm:p-5">
-                  <div className="w-10 h-10 rounded-xl bg-orchid-primary/15 flex items-center justify-center text-orchid-primary mb-3 group-hover:bg-orchid-primary/25 transition-colors shrink-0">
-                    <Icon className="w-5 h-5" />
+                <div>
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="w-11 h-11 rounded-2xl bg-orchid-primary/10 text-orchid-primary flex items-center justify-center group-hover:bg-orchid-primary group-hover:text-white transition-all shadow-xs">
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <span className="text-[11px] font-mono text-muted-foreground px-2.5 py-1 rounded-full bg-muted border border-border/60">
+                      {service.category}
+                    </span>
                   </div>
-                  <h3 className="text-sm sm:text-base font-bold mb-1.5 leading-snug">{service.title}</h3>
-                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{service.desc}</p>
-                </GlassCard>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
-};
 
-const About = () => (
-  <section id="about" className="py-20 sm:py-28 px-4 sm:px-6">
-    <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-10 md:gap-14 items-center">
-      <RevealSection>
-        <div className="relative">
-          <div className="absolute -inset-3 bg-gradient-to-br from-orchid-primary/20 via-orchid-secondary/10 to-orchid-accent/15 rounded-[32px] blur-2xl" />
-          <div className="relative glass-card-strong rounded-2xl overflow-hidden">
-            <img
-              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=800"
-              alt="Team working"
-              className="w-full aspect-[4/3] object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-            <div className="absolute bottom-3 left-3 right-3 glass-card rounded-xl px-3.5 py-2.5 flex items-center gap-2.5">
-              <Sparkles className="w-4 h-4 text-orchid-secondary shrink-0" />
-              <span className="text-xs sm:text-sm font-medium">10+ years of innovation</span>
-            </div>
-          </div>
-        </div>
-      </RevealSection>
-      <RevealSection delay={80}>
-        <span className="inline-block text-[11px] font-semibold tracking-[0.2em] uppercase text-orchid-secondary mb-3">About Us</span>
-        <h2 className="text-[clamp(1.5rem,4vw,2.75rem)] font-bold mb-4 leading-tight">Crafting the <span className="liquid-text">Future</span> Together</h2>
-        <p className="text-muted-foreground text-sm sm:text-base mb-6 leading-relaxed">
-          Orchid Lab is a multidisciplinary collective of creators, engineers, and visionaries dedicated to pushing the boundaries of what's possible in the digital realm. From AI-driven platforms to exquisite design, we partner with forward-thinking brands to build the future.
-        </p>
-        <div className="grid grid-cols-2 gap-2 mb-6">
-          {values.map((v) => {
-            const Icon = v.icon;
-            return (
-              <div key={v.label} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-orchid-primary/[0.06] border border-orchid-primary/[0.08]">
-                <Icon className="w-4 h-4 text-orchid-secondary shrink-0" />
-                <span className="font-semibold text-xs sm:text-sm">{v.label}</span>
-              </div>
-            );
-          })}
-        </div>
-        <LiquidButton variant="glass" onClick={() => scrollTo('contact')}>
-          Let's Work Together <ChevronRight className="ml-1 w-4 h-4" />
-        </LiquidButton>
-      </RevealSection>
-    </div>
-  </section>
-);
+                  <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2 group-hover:text-orchid-primary transition-colors">
+                    {service.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+                    {service.desc}
+                  </p>
+                </div>
 
-const Testimonials = () => {
-  const [ref, visible] = useReveal(0.05);
-  return (
-    <section id="testimonials" className="py-20 sm:py-28 px-4 sm:px-6">
-      <div className="max-w-7xl mx-auto">
-        <RevealSection>
-          <div className="text-center mb-14 sm:mb-18">
-            <span className="inline-block text-[11px] font-semibold tracking-[0.2em] uppercase text-orchid-secondary mb-3">Client Stories</span>
-            <h2 className="text-[clamp(1.75rem,5vw,3.25rem)] font-bold leading-tight">What Our <span className="liquid-text">Clients Say</span></h2>
-          </div>
-        </RevealSection>
-        <div ref={ref} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-          {testimonials.map((t, i) => (
-            <div
-              key={i}
-              className={`reveal ${visible ? 'visible' : ''}`}
-              style={{ transitionDelay: `${i * 60}ms` }}
-            >
-              <GlassCard className="h-full flex flex-col p-5 sm:p-6">
-                <Quote className="w-6 h-6 text-orchid-primary/25 mb-3 shrink-0" />
-                <p className="text-muted-foreground leading-relaxed mb-5 flex-1 text-sm sm:text-[15px]">&ldquo;{t.content}&rdquo;</p>
-                <div className="flex items-center gap-1 mb-3">
-                  {Array.from({ length: 5 }).map((_, s) => (
-                    <Star key={s} className="w-3.5 h-3.5 fill-orchid-secondary text-orchid-secondary" />
+                {/* Highlights */}
+                <div className="pt-4 border-t border-border/60 space-y-1.5">
+                  {service.highlights.map((h) => (
+                    <div key={h} className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-orchid-secondary shrink-0" />
+                      <span>{h}</span>
+                    </div>
                   ))}
                 </div>
-                <div className="flex items-center gap-3 pt-3.5 border-t border-foreground/[0.06]">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orchid-primary to-orchid-accent flex items-center justify-center text-white font-bold text-sm shrink-0">
-                    {t.name.charAt(0)}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="font-semibold text-sm truncate">{t.name}</div>
-                    <div className="text-[11px] text-muted-foreground truncate">{t.role}</div>
-                  </div>
-                </div>
-              </GlassCard>
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
   );
 };
 
-const CTA = () => (
-  <section id="cta" className="py-20 sm:py-28 px-4 sm:px-6">
-    <div className="max-w-5xl mx-auto">
-      <RevealSection>
-        <div className="relative overflow-hidden glass-card-strong rounded-3xl sm:rounded-[36px] p-8 sm:p-12 md:p-16 text-center">
-          <div className="absolute inset-0 bg-gradient-to-br from-orchid-primary/[0.07] via-transparent to-orchid-accent/[0.07] pointer-events-none" />
-          <div className="absolute -top-32 -right-32 w-80 h-80 bg-orchid-secondary/[0.08] rounded-full blur-[100px]" />
-          <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-orchid-accent/[0.08] rounded-full blur-[100px]" />
-          <div className="relative z-10">
-            <h2 className="text-[clamp(1.5rem,4vw,3rem)] font-bold mb-3 sm:mb-4 leading-tight">
-              Ready to Build <span className="liquid-text">Something Great?</span>
-            </h2>
-            <p className="text-muted-foreground text-sm sm:text-base md:text-lg mb-7 sm:mb-8 max-w-xl mx-auto">
-              Whether you have a specific project in mind or just want to explore the possibilities, we're here to bring your vision to life.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <LiquidButton variant="primary" onClick={() => scrollTo('contact')}>
-                <MessageSquare className="mr-2 w-5 h-5" /> Start a Project
-              </LiquidButton>
-              <LiquidButton variant="glass" onClick={() => window.location.href = 'mailto:hello@orchidlab.com'}>
-                <Mail className="mr-2 w-5 h-5" /> hello@orchidlab.com
-              </LiquidButton>
+// --- ABOUT SECTION ---
+
+const About = () => (
+  <section id="about" className="py-24 sm:py-32 px-4 sm:px-6 border-t border-border/60 bg-muted/10 relative">
+    <div className="max-w-7xl mx-auto">
+      <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+        {/* Left: Philosophy & Values */}
+        <div className="lg:col-span-7 space-y-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted/80 border border-border/70 text-xs font-mono uppercase tracking-wider text-orchid-secondary">
+            <Layers className="w-3.5 h-3.5" />
+            <span>Our Philosophy</span>
+          </div>
+          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-foreground leading-tight">
+            Crafting the <span className="liquid-text">Next Frontier</span> of Digital Reality
+          </h2>
+          <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
+            Orchid Labs operates at the intersection of cognitive AI engineering, high-craft aesthetics, and distributed systems. We do not build generic templates—we architect bespoke digital flagships that give founders and enterprises total technological autonomy.
+          </p>
+
+          <div className="grid sm:grid-cols-2 gap-4 pt-4">
+            {values.map((v) => {
+              const Icon = v.icon;
+              return (
+                <div key={v.title} className="p-4 rounded-2xl bg-card border border-border/60 space-y-2">
+                  <div className="w-8 h-8 rounded-lg bg-orchid-primary/10 text-orchid-primary flex items-center justify-center">
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <h4 className="font-bold text-sm text-foreground">{v.title}</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{v.desc}</p>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="pt-2">
+            <button
+              onClick={() => scrollTo('contact')}
+              className="px-6 py-3 rounded-full bg-foreground text-background font-semibold text-sm inline-flex items-center gap-2 hover:opacity-90 active:scale-95 transition-all cursor-pointer shadow-sm"
+            >
+              <span>Partner with Our Collective</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Right: Studio Imagery / Editorial Showcase */}
+        <div className="lg:col-span-5 relative">
+          <div className="relative rounded-3xl overflow-hidden border border-border/80 shadow-2xl bg-card group">
+            <img
+              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=900"
+              alt="Orchid Labs Studio"
+              className="w-full aspect-[4/5] object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/20 to-transparent" />
+
+            <div className="absolute bottom-6 left-6 right-6 p-5 rounded-2xl bg-background/85 backdrop-blur-xl border border-border/80">
+              <div className="flex items-center gap-2.5 mb-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-xs font-mono font-bold text-foreground">Orchid Collective // San Francisco</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Engineers, sound designers, AI researchers, and editorial typographers operating globally.
+              </p>
             </div>
           </div>
         </div>
-      </RevealSection>
+      </div>
     </div>
   </section>
 );
 
+// --- TESTIMONIALS SECTION ---
+
+const Testimonials = () => (
+  <section id="testimonials" className="py-24 sm:py-32 px-4 sm:px-6 relative">
+    <div className="max-w-7xl mx-auto">
+      <div className="text-center max-w-3xl mx-auto mb-16">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted/80 border border-border/70 text-xs font-mono uppercase tracking-wider text-orchid-secondary mb-3">
+          <Quote className="w-3.5 h-3.5" />
+          <span>Proven Impact</span>
+        </div>
+        <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-foreground mb-4">
+          Trusted by <span className="liquid-text">World-Class Teams</span>
+        </h2>
+        <p className="text-muted-foreground text-sm sm:text-base">
+          Read how Orchid Labs empowers enterprises to ship category-defining digital experiences.
+        </p>
+      </div>
+
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {testimonials.map((t, i) => (
+          <div
+            key={i}
+            className="p-6 sm:p-7 rounded-3xl bg-card/70 backdrop-blur-lg border border-border/70 hover:border-orchid-primary/40 transition-all duration-300 flex flex-col justify-between shadow-sm"
+          >
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: 5 }).map((_, s) => (
+                    <Star key={s} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  ))}
+                </div>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/15 text-emerald-500">
+                  {t.stats}
+                </span>
+              </div>
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-6">
+                &ldquo;{t.content}&rdquo;
+              </p>
+            </div>
+
+            <div className="pt-4 border-t border-border/60 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orchid-primary to-orchid-accent flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-xs">
+                {t.name.charAt(0)}
+              </div>
+              <div>
+                <div className="font-semibold text-sm text-foreground">{t.name}</div>
+                <div className="text-xs text-muted-foreground">{t.role}</div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+// --- INTERACTIVE CONTACT & ESTIMATOR SECTION ---
+
 const Contact = () => {
+  const [selectedService, setSelectedService] = useState('Autonomous AI Agents');
+  const [selectedBudget, setSelectedBudget] = useState('$25k - $50k');
+  const [selectedTimeline, setSelectedTimeline] = useState('1 - 3 Months');
+
   const form = useForm<ContactForm>({
     resolver: zodResolver(contactSchema),
-    defaultValues: { name: '', email: '', subject: '', message: '' },
+    defaultValues: {
+      name: '',
+      email: '',
+      service: 'Autonomous AI Agents',
+      budget: '$25k - $50k',
+      timeline: '1 - 3 Months',
+      message: '',
+    },
   });
 
   const onSubmit = (data: ContactForm) => {
-    toast.success('Message sent successfully!', {
-      description: `Thanks ${data.name}, we'll be in touch within 24 hours.`,
+    toast.success('Consultation request received!', {
+      description: `Thank you ${data.name}. Our engineering partner will respond within 24 hours.`,
     });
     form.reset();
   };
 
   return (
-    <section id="contact" className="py-20 sm:py-28 px-4 sm:px-6">
+    <section id="contact" className="py-24 sm:py-32 px-4 sm:px-6 border-t border-border/60 bg-muted/15 relative">
       <div className="max-w-7xl mx-auto">
-        <RevealSection>
-          <div className="text-center mb-14 sm:mb-18">
-            <span className="inline-block text-[11px] font-semibold tracking-[0.2em] uppercase text-orchid-secondary mb-3">Get in Touch</span>
-            <h2 className="text-[clamp(1.75rem,5vw,3.25rem)] font-bold leading-tight">Let's <span className="liquid-text">Connect</span></h2>
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted/80 border border-border/70 text-xs font-mono uppercase tracking-wider text-orchid-secondary mb-3">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Start a Project</span>
           </div>
-        </RevealSection>
-        <div className="grid lg:grid-cols-5 gap-6 sm:gap-10 max-lg:max-w-2xl mx-auto">
-          <RevealSection className="lg:col-span-2 space-y-5">
-            <div className="glass-card-strong rounded-2xl p-5 sm:p-7">
-              <h3 className="text-lg font-bold mb-5">Contact Info</h3>
-              <div className="space-y-4">
-                {[
-                  { icon: Mail, label: "Email", value: "hello@orchidlab.com", href: "mailto:hello@orchidlab.com" },
-                  { icon: Phone, label: "Phone", value: "+1 (234) 567-890", href: "tel:+1234567890" },
-                  { icon: MapPin, label: "Location", value: "San Francisco, CA" },
-                ].map((item, i) => {
-                  const Icon = item.icon;
-                  return (
-                    <div key={i} className="flex items-center gap-3.5">
-                      <div className="w-9 h-9 rounded-lg bg-orchid-primary/15 flex items-center justify-center text-orchid-primary shrink-0">
-                        <Icon className="w-4 h-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">{item.label}</div>
-                        {item.href
-                          ? <a href={item.href} className="font-medium text-sm hover:text-orchid-primary transition-colors truncate block">{item.value}</a>
-                          : <div className="font-medium text-sm truncate">{item.value}</div>
-                        }
-                      </div>
-                    </div>
-                  );
-                })}
+          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-foreground mb-4">
+            Let&rsquo;s Engineer <span className="liquid-text">Your Vision</span>
+          </h2>
+          <p className="text-muted-foreground text-sm sm:text-base">
+            Select your project parameters below to get an instant scope estimate and initiate consultation.
+          </p>
+        </div>
+
+        <div className="max-w-4xl mx-auto rounded-3xl bg-card/90 backdrop-blur-2xl border border-border/80 shadow-2xl p-6 sm:p-10 md:p-12">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              {/* Parameter 1: Service Type Selection Pills */}
+              <div>
+                <label className="block text-xs font-mono uppercase tracking-wider text-muted-foreground mb-3">
+                  1. What service do you require?
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    'Autonomous AI Agents',
+                    '3D & Web Platform',
+                    'Software Architecture',
+                    'UI/UX Design Systems',
+                    'Spatial Audio',
+                    'Digital Publishing',
+                  ].map((s) => {
+                    const isSelected = selectedService === s;
+                    return (
+                      <button
+                        type="button"
+                        key={s}
+                        onClick={() => {
+                          setSelectedService(s);
+                          form.setValue('service', s);
+                        }}
+                        className={`px-3.5 py-2 rounded-full text-xs font-medium transition-all cursor-pointer border ${
+                          isSelected
+                            ? 'bg-foreground text-background border-foreground shadow-xs'
+                            : 'bg-muted/60 border-border text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        {s}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-            <div className="glass-card-strong rounded-2xl p-5 sm:p-7">
-              <h3 className="text-lg font-bold mb-3">Follow Us</h3>
-              <p className="text-sm text-muted-foreground mb-4">Stay connected for the latest in tech and design.</p>
-              <div className="flex gap-2.5">
-                {[Twitter, Linkedin, Github].map((Icon, i) => (
-                  <a key={i} href="#" className="w-9 h-9 rounded-lg glass-card flex items-center justify-center text-muted-foreground hover:text-orchid-primary hover:border-orchid-primary/25 transition-all">
-                    <Icon className="w-4 h-4" />
-                  </a>
-                ))}
+
+              {/* Parameter 2: Budget Tier Selection Pills */}
+              <div>
+                <label className="block text-xs font-mono uppercase tracking-wider text-muted-foreground mb-3">
+                  2. Anticipated Budget Range
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {['$15k - $30k', '$30k - $60k', '$60k - $120k', '$120k+ Enterprise'].map((b) => {
+                    const isSelected = selectedBudget === b;
+                    return (
+                      <button
+                        type="button"
+                        key={b}
+                        onClick={() => {
+                          setSelectedBudget(b);
+                          form.setValue('budget', b);
+                        }}
+                        className={`px-3.5 py-2 rounded-full text-xs font-medium transition-all cursor-pointer border ${
+                          isSelected
+                            ? 'bg-foreground text-background border-foreground shadow-xs'
+                            : 'bg-muted/60 border-border text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        {b}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          </RevealSection>
-          <RevealSection delay={80} className="lg:col-span-3">
-            <div className="glass-card-strong rounded-2xl p-5 sm:p-7 md:p-9">
-              <h3 className="text-lg font-bold mb-1">Send a Message</h3>
-              <p className="text-sm text-muted-foreground mb-5">Fill out the form and we'll respond within 24 hours.</p>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <FormField control={form.control} name="name" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Name</FormLabel>
-                        <FormControl><Input placeholder="Your name" {...field} className="h-10 sm:h-11" /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-                    <FormField control={form.control} name="email" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl><Input placeholder="your@email.com" type="email" {...field} className="h-10 sm:h-11" /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-                  </div>
-                  <FormField control={form.control} name="subject" render={({ field }) => (
+
+              {/* Parameter 3: Timeline Pills */}
+              <div>
+                <label className="block text-xs font-mono uppercase tracking-wider text-muted-foreground mb-3">
+                  3. Timeline Target
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {['< 1 Month (Sprint)', '1 - 3 Months', '3 - 6 Months', 'Ongoing Retainer'].map((t) => {
+                    const isSelected = selectedTimeline === t;
+                    return (
+                      <button
+                        type="button"
+                        key={t}
+                        onClick={() => {
+                          setSelectedTimeline(t);
+                          form.setValue('timeline', t);
+                        }}
+                        className={`px-3.5 py-2 rounded-full text-xs font-medium transition-all cursor-pointer border ${
+                          isSelected
+                            ? 'bg-foreground text-background border-foreground shadow-xs'
+                            : 'bg-muted/60 border-border text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        {t}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Input Fields */}
+              <div className="grid sm:grid-cols-2 gap-5 pt-2">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Subject</FormLabel>
-                      <FormControl><Input placeholder="What's this about?" {...field} className="h-10 sm:h-11" /></FormControl>
+                      <FormLabel className="text-xs font-medium">Your Full Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Elena Vance" {...field} className="rounded-xl h-11 bg-muted/40 border-border" />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
-                  )} />
-                  <FormField control={form.control} name="message" render={({ field }) => (
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Message</FormLabel>
-                      <FormControl><Textarea placeholder="Tell us about your project..." className="min-h-[120px] resize-none" {...field} /></FormControl>
+                      <FormLabel className="text-xs font-medium">Work Email Address</FormLabel>
+                      <FormControl>
+                        <Input placeholder="elena@company.com" type="email" {...field} className="rounded-xl h-11 bg-muted/40 border-border" />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
-                  )} />
-                  <Button type="submit" className="w-full h-11 bg-orchid-primary hover:bg-orchid-primary/90 text-white rounded-xl font-semibold gap-2 cursor-pointer transition-all active:scale-[0.98]">
-                    <Send className="w-4 h-4" /> Send Message
-                  </Button>
-                </form>
-              </Form>
-            </div>
-          </RevealSection>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="message"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs font-medium">Project Brief & Goals</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Tell us about the architecture, key requirements, and expected launch date..."
+                        className="rounded-xl min-h-[120px] bg-muted/40 border-border resize-none"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Button
+                type="submit"
+                className="w-full py-4 rounded-full bg-foreground text-background font-semibold text-sm hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer shadow-lg flex items-center justify-center gap-2"
+              >
+                <Send className="w-4 h-4" />
+                <span>Submit Inquiry to Engineering</span>
+              </Button>
+            </form>
+          </Form>
         </div>
       </div>
     </section>
   );
 };
 
+// --- FOOTER SECTION ---
+
 const FooterSection = () => (
-  <footer className="py-12 sm:py-14 px-4 sm:px-6 border-t border-foreground/[0.04]">
+  <footer className="py-16 px-4 sm:px-6 border-t border-border/60 bg-background text-foreground">
     <div className="max-w-7xl mx-auto">
-      <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10 mb-10">
-        <div className="sm:col-span-2 md:col-span-1">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-7 h-7 rounded-lg overflow-hidden">
-              <img src={logo} alt="Orchid Lab" className="w-full h-full object-cover" />
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-10 mb-14">
+        {/* Brand Column */}
+        <div className="md:col-span-2 space-y-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl overflow-hidden bg-gradient-to-br from-orchid-primary to-orchid-accent flex items-center justify-center p-0.5">
+              <img src={logo} alt="Orchid Labs" className="w-full h-full object-cover rounded-lg" />
             </div>
-            <span className="text-foreground font-bold text-lg">Orchid Lab</span>
+            <span className="font-bold text-lg tracking-tight">Orchid Labs</span>
+            <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-muted text-muted-foreground border border-border">
+              v2.5
+            </span>
           </div>
-          <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-            A full-service creative and technology company crafting intelligent systems, beautiful experiences, and digital masterpieces.
+          <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
+            A full-service multidisciplinary technology & design collective crafting autonomous systems, spatial 3D web platforms, and digital masterpieces.
           </p>
+          <div className="flex items-center gap-2 pt-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-xs font-mono text-muted-foreground">All Core Systems Operational</span>
+          </div>
         </div>
+
+        {/* Capabilities */}
         <div>
-          <h4 className="font-semibold text-xs mb-4 uppercase tracking-widest text-muted-foreground">Quick Links</h4>
-          <ul className="space-y-2.5">
-            {['Services', 'About', 'Testimonials', 'Contact'].map((link) => (
-              <li key={link}>
-                <a href={`#${link.toLowerCase()}`} className="text-sm text-muted-foreground hover:text-orchid-primary transition-colors">{link}</a>
-              </li>
-            ))}
+          <h4 className="font-mono text-xs uppercase tracking-wider text-muted-foreground mb-4 font-semibold">
+            Capabilities
+          </h4>
+          <ul className="space-y-2 text-sm text-muted-foreground">
+            <li><a href="#services" className="hover:text-foreground transition-colors">Autonomous AI Agents</a></li>
+            <li><a href="#services" className="hover:text-foreground transition-colors">Software Engineering</a></li>
+            <li><a href="#services" className="hover:text-foreground transition-colors">3D & Web Platforms</a></li>
+            <li><a href="#services" className="hover:text-foreground transition-colors">UI/UX Design Systems</a></li>
+            <li><a href="#services" className="hover:text-foreground transition-colors">Spatial Audio Studio</a></li>
           </ul>
         </div>
+
+        {/* Navigation */}
         <div>
-          <h4 className="font-semibold text-xs mb-4 uppercase tracking-widest text-muted-foreground">Services</h4>
-          <ul className="space-y-2.5">
-            {['Software Dev', 'Web Dev', 'UI/UX Design', 'AI & Bots'].map((link) => (
-              <li key={link}>
-                <a href="#services" className="text-sm text-muted-foreground hover:text-orchid-primary transition-colors">{link}</a>
-              </li>
-            ))}
+          <h4 className="font-mono text-xs uppercase tracking-wider text-muted-foreground mb-4 font-semibold">
+            Exploration
+          </h4>
+          <ul className="space-y-2 text-sm text-muted-foreground">
+            <li><a href="#interactive-lab" className="hover:text-foreground transition-colors">Interactive Sandbox</a></li>
+            <li><a href="#works" className="hover:text-foreground transition-colors">Selected Works</a></li>
+            <li><a href="#about" className="hover:text-foreground transition-colors">Our Collective</a></li>
+            <li><a href="#testimonials" className="hover:text-foreground transition-colors">Client Endorsements</a></li>
+            <li><a href="#contact" className="hover:text-foreground transition-colors">Book Consultation</a></li>
           </ul>
         </div>
+
+        {/* Connect */}
         <div>
-          <h4 className="font-semibold text-xs mb-4 uppercase tracking-widest text-muted-foreground">Connect</h4>
-          <ul className="space-y-2.5">
-            <li><a href="mailto:hello@orchidlab.com" className="text-sm text-muted-foreground hover:text-orchid-primary transition-colors">hello@orchidlab.com</a></li>
-            {['Twitter / X', 'LinkedIn', 'GitHub'].map((link) => (
-              <li key={link}>
-                <a href="#" className="text-sm text-muted-foreground hover:text-orchid-primary transition-colors">{link}</a>
-              </li>
-            ))}
+          <h4 className="font-mono text-xs uppercase tracking-wider text-muted-foreground mb-4 font-semibold">
+            Direct Line
+          </h4>
+          <ul className="space-y-2 text-sm text-muted-foreground">
+            <li><a href="mailto:hello@orchidlabs.com" className="hover:text-foreground transition-colors">hello@orchidlabs.com</a></li>
+            <li><a href="https://github.com" target="_blank" rel="noreferrer" className="hover:text-foreground transition-colors">GitHub Repository</a></li>
+            <li><a href="https://x.com" target="_blank" rel="noreferrer" className="hover:text-foreground transition-colors">Twitter / X</a></li>
+            <li><a href="https://linkedin.com" target="_blank" rel="noreferrer" className="hover:text-foreground transition-colors">LinkedIn</a></li>
           </ul>
         </div>
       </div>
-      <div className="pt-6 border-t border-foreground/[0.04] flex flex-col sm:flex-row justify-between items-center gap-4">
-        <p className="text-sm text-foreground/35">&copy; 2025 Orchid Lab. All rights reserved.</p>
-        <div className="flex gap-5">
-          {[Twitter, Linkedin, Github].map((Icon, i) => (
-            <a key={i} href="#" className="text-foreground/35 hover:text-orchid-primary transition-colors"><Icon className="w-4 h-4" /></a>
-          ))}
+
+      <div className="pt-8 border-t border-border/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
+        <div>&copy; {new Date().getFullYear()} Orchid Labs Collective. All rights reserved.</div>
+        <div className="flex items-center gap-6">
+          <a href="#hero" className="hover:text-foreground transition-colors">Privacy Policy</a>
+          <a href="#hero" className="hover:text-foreground transition-colors">Security Architecture</a>
+          <a href="#hero" className="hover:text-foreground transition-colors">Back to Top ↑</a>
         </div>
       </div>
     </div>
   </footer>
 );
 
+// --- MAIN APPLICATION ---
+
 function App() {
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-      <div className="min-h-screen bg-background text-foreground font-sans selection:bg-orchid-primary/30 overflow-x-hidden">
+      <div className="min-h-screen bg-background text-foreground font-sans selection:bg-orchid-primary/30 selection:text-foreground overflow-x-hidden">
         <LiquidBackground />
         <GlassNavbar />
-        <Toaster position="bottom-right" />
+        <Toaster position="bottom-right" richColors />
         <main className="relative z-0">
           <Hero />
           <Stats />
+          <FeaturedWorks />
+          <InteractiveStudioLab />
           <Services />
           <About />
           <Testimonials />
-          <CTA />
           <Contact />
         </main>
         <FooterSection />
